@@ -35,6 +35,7 @@ public class ShopaholicClient {
     private Callback<CitiesResponse> getAllCitiesCallback = new Callback<CitiesResponse>() {
         @Override
         public void onResponse(Call<CitiesResponse> call, Response<CitiesResponse> response) {
+            // If the response is not su
             if(response.isSuccessful() && response.body() != null) {
                 Log.d(TAG, "Get all cities successfully completed.");
                 data = response.body();
