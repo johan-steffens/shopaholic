@@ -4,6 +4,7 @@
     android:layout_height="match_parent">
 
     <ImageView
+        android:id="@+id/imgLogo"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:src="@drawable/img_logo"
@@ -11,10 +12,26 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"/>
 
-    <TextView
-        android:layout_width="wrap_content"
+    <ListView
+        android:id="@+id/listShopaholic"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        android:layout_centerInParent="true"/>
+        android:layout_below="@id/imgLogo"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="20dp">
+
+    </ListView>
+
+    <TextView
+        android:id="@+id/txtStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/semiTransparent"
+        android:layout_alignTop="@id/listShopaholic"
+        android:layout_alignBottom="@id/listShopaholic"
+        android:gravity="center"
+        android:text="Loading"
+        android:textColor="@color/colorAccent"
+        android:textSize="25sp"/>
 
 </RelativeLayout>
