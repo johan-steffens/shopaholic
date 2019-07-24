@@ -2,10 +2,16 @@ package za.co.steff.shopaholicsdk;
 
 import android.util.Log;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import za.co.steff.shopaholicsdk.common.dto.City;
+import za.co.steff.shopaholicsdk.common.dto.Mall;
+import za.co.steff.shopaholicsdk.network.model.CityResponse;
 import za.co.steff.shopaholicsdk.common.exception.ClientLoadFailedException;
 import za.co.steff.shopaholicsdk.network.APIServiceGenerator;
 import za.co.steff.shopaholicsdk.network.model.CitiesResponse;
@@ -65,15 +71,94 @@ public class ShopaholicClient {
         }
     };
 
+    private void checkDataLoaded() {
+        if(data == null)
+            throw new IllegalStateException("The Shopaholic Client is in an unprepared state. Please ensure that data has been successfully loaded before executing any queries.");
+    }
+
+    /**
+     * Forces data to be fetched from remote resource.
+     *
+     * Completion will call attached {@link ShopaholicClientEventListener} onClientLoaded() or
+     * onClientLoadError() method depending on whether the data was successfully retrieved or not.
+     */
     public void reloadData() {
         fetchRemoteData();
     }
 
-    public interface ShopaholicClientEventListener {
+    /**
+     * @return a list of cities contained within the retrieved data set.
+     */
+    public List<City> getAllCities() {
+        // Ensure we have data before proceeding
+        checkDataLoaded();
 
+        // Return a list of all cities
+        return data.getCities().stream()
+                .map(city -> new City(city))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * @param id the id of the city to be retrieved
+     * @return a city based on provided id, or null if the city can't be found
+     */
+    public City getCity(long id) {
+        // Ensure we have data before proceeding
+        checkDataLoaded();
+
+        // Try to find the city based on its id
+        Optional<CityResponse> cityFound = data.getCities().stream()
+                .filter(city -> city.getId() == id)
+                .findFirst();
+
+        // If the city was found, return it. Otherwise return null.
+        if(cityFound.isPresent()) {
+            return new City(cityFound.get());
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     *
+     * @param city the city whose malls are to be retrieved
+     * @return a list of malls associated to the given city
+     */
+    public List<Mall> getMallsForCity(City city) {
+        return getMallsForCity(city.getId());
+    }
+
+    /**
+     *
+     * @param cityId the id of the city whose malls are to be retrieved
+     * @return a list of malls associated to the given city
+     */
+    public List<Mall> getMallsForCity(long cityId) {
+        // Ensure we have data before proceeding
+        checkDataLoaded();
+
+        // Try to find the city based on its id
+        Optional<CityResponse> cityFound = data.getCities().stream()
+                .filter(city -> city.getId() == cityId)
+                .findFirst();
+
+        // If the city was found, return a list of its malls. Otherwise return null.
+        if(cityFound.isPresent()) {
+            return cityFound.get().getMalls().stream()
+                    .map(mall -> new Mall(mall))
+                    .collect(Collectors.toList());
+        } else {
+            return null;
+        }
+    }
+
+
+
+
+    public interface ShopaholicClientEventListener {
         void onClientLoaded();
         void onClientLoadError(Throwable t);
-
     }
 
 }

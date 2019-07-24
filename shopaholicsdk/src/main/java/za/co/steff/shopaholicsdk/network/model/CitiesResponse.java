@@ -2,17 +2,15 @@ package za.co.steff.shopaholicsdk.network.model;
 
 import java.util.List;
 
-import za.co.steff.shopaholicsdk.common.dto.City;
-
 public class CitiesResponse {
 
-    private List<City> cities;
+    private List<CityResponse> cities;
 
-    public List<City> getCities() {
+    public List<CityResponse> getCities() {
         return cities;
     }
 
-    public void setCities(List<City> cities) {
+    public void setCities(List<CityResponse> cities) {
         this.cities = cities;
     }
 

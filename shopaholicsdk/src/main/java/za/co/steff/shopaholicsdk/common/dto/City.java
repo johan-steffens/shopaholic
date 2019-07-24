@@ -1,23 +1,17 @@
 package za.co.steff.shopaholicsdk.common.dto;
 
-import java.util.List;
+import za.co.steff.shopaholicsdk.network.model.CityResponse;
 
 public class City extends IdNameBase {
 
-    private List<Mall> malls;
+    public City() {}
 
-    public List<Mall> getMalls() {
-        return malls;
+    public City(long id, String name) {
+        super(id, name);
     }
 
-    public void setMalls(List<Mall> malls) {
-        this.malls = malls;
+    public City(CityResponse city) {
+        super(city.getId(), city.getName());
     }
 
-    @Override
-    public String toString() {
-        return "City{" +
-                "malls=" + malls +
-                "} " + super.toString();
-    }
 }

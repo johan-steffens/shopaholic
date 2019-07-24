@@ -1,23 +1,17 @@
 package za.co.steff.shopaholicsdk.common.dto;
 
-import java.util.List;
+import za.co.steff.shopaholicsdk.network.model.MallResponse;
 
 public class Mall extends IdNameBase {
 
-    private List<Shop> shops;
+    public Mall() {}
 
-    public List<Shop> getShops() {
-        return shops;
+    public Mall(long id, String name) {
+        super(id, name);
     }
 
-    public void setShops(List<Shop> shops) {
-        this.shops = shops;
+    public Mall(MallResponse mall) {
+        super(mall.getId(), mall.getName());
     }
 
-    @Override
-    public String toString() {
-        return "Mall{" +
-                "shops=" + shops +
-                "} " + super.toString();
-    }
 }

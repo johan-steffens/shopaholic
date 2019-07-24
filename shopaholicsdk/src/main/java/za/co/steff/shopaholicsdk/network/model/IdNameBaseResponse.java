@@ -1,16 +1,9 @@
-package za.co.steff.shopaholicsdk.common.dto;
+package za.co.steff.shopaholicsdk.network.model;
 
-public class IdNameBase {
+public class IdNameBaseResponse {
 
     private long id;
     private String name;
-
-    public IdNameBase() {}
-
-    public IdNameBase(long id, String name) {
-        this.id = id;
-        this.name = name;
-    }
 
     public long getId() {
         return id;
@@ -30,7 +23,7 @@ public class IdNameBase {
 
     @Override
     public String toString() {
-        return "IdNameBase{" +
+        return "Base{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 '}';
