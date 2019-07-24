@@ -15,6 +15,7 @@ import za.co.steff.shopaholicsdk.network.model.CityResponse;
 import za.co.steff.shopaholicsdk.common.exception.ClientLoadFailedException;
 import za.co.steff.shopaholicsdk.network.APIServiceGenerator;
 import za.co.steff.shopaholicsdk.network.model.CitiesResponse;
+import za.co.steff.shopaholicsdk.network.model.MallResponse;
 import za.co.steff.shopaholicsdk.network.service.ShopaholicService;
 
 public class ShopaholicClient {
@@ -41,7 +42,7 @@ public class ShopaholicClient {
     private Callback<CitiesResponse> getAllCitiesCallback = new Callback<CitiesResponse>() {
         @Override
         public void onResponse(Call<CitiesResponse> call, Response<CitiesResponse> response) {
-            // If the response is not su
+            // Check to see that the response is successful and the body is present
             if(response.isSuccessful() && response.body() != null) {
                 Log.d(TAG, "Get all cities successfully completed.");
                 data = response.body();
@@ -112,7 +113,7 @@ public class ShopaholicClient {
                 .filter(city -> city.getId() == id)
                 .findFirst();
 
-        // If the city was found, return it. Otherwise return null.
+        // If the city was found, return it. Otherwise return null
         if(cityFound.isPresent()) {
             return new City(cityFound.get());
         } else {
@@ -143,7 +144,7 @@ public class ShopaholicClient {
                 .filter(city -> city.getId() == cityId)
                 .findFirst();
 
-        // If the city was found, return a list of its malls. Otherwise return null.
+        // If the city was found, return a list of its malls. Otherwise return null
         if(cityFound.isPresent()) {
             return cityFound.get().getMalls().stream()
                     .map(mall -> new Mall(mall))
@@ -153,8 +154,45 @@ public class ShopaholicClient {
         }
     }
 
+    /**
+     * @param city the city that the mall is found in
+     * @param mallId the id of the mall to be retrieved
+     * @return a mall based on provided city and mallId, or null if the mall can't be found
+     */
+    public Mall getMall(City city, long mallId) {
+        return getMall(city.getId(), mallId);
+    }
 
+    /**
+     * @param cityId the id of the city that the mall is found in
+     * @param mallId the id of the mall to be retrieved
+     * @return a mall based on provided cityId and mallId, or null if the mall can't be found
+     */
+    public Mall getMall(long cityId, long mallId) {
+        // Ensure we have data before proceeding
+        checkDataLoaded();
 
+        // Try to find the city based on its id
+        Optional<CityResponse> cityFound = data.getCities().stream()
+                .filter(city -> city.getId() == cityId)
+                .findFirst();
+
+        // If the city is present, search for the mall
+        if(cityFound.isPresent()) {
+            // Try to find the mall based on its id
+            Optional<MallResponse> mallFound = cityFound.get().getMalls().stream()
+                    .filter(mall -> mall.getId() == mallId)
+                    .findFirst();
+
+            // If the mall was found, return it
+            if(mallFound.isPresent()) {
+                return new Mall(mallFound.get());
+            }
+        }
+
+        // If the city or the mall is not found, return null
+        return null;
+    }
 
     public interface ShopaholicClientEventListener {
         void onClientLoaded();
