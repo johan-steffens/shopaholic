@@ -24,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onClientLoaded() {
             Log.d(TAG, "Client successfully loaded");
+            Log.d(TAG, "First city :: " + client.getAllCities().get(0).toString());
         }
 
         @Override

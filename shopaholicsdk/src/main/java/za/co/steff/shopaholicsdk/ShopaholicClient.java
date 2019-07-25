@@ -11,11 +11,13 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import za.co.steff.shopaholicsdk.common.dto.City;
 import za.co.steff.shopaholicsdk.common.dto.Mall;
+import za.co.steff.shopaholicsdk.common.dto.Shop;
 import za.co.steff.shopaholicsdk.network.model.CityResponse;
 import za.co.steff.shopaholicsdk.common.exception.ClientLoadFailedException;
 import za.co.steff.shopaholicsdk.network.APIServiceGenerator;
 import za.co.steff.shopaholicsdk.network.model.CitiesResponse;
 import za.co.steff.shopaholicsdk.network.model.MallResponse;
+import za.co.steff.shopaholicsdk.network.model.ShopResponse;
 import za.co.steff.shopaholicsdk.network.service.ShopaholicService;
 
 public class ShopaholicClient {
@@ -191,6 +193,81 @@ public class ShopaholicClient {
         }
 
         // If the city or the mall is not found, return null
+        return null;
+    }
+
+    /**
+     * @param mall the mall that the shop is found in
+     * @return a list of shops associated to the given mall
+     */
+    public List<Shop> getShopsForMall(Mall mall) {
+        return getShopsForMall(mall.getId());
+    }
+
+    /**
+     * @param mallId the id of the mall that the shop is found in
+     * @return a list of shops associated to the given mall
+     */
+    public List<Shop> getShopsForMall(long mallId) {
+        // Ensure we have data before proceeding
+        checkDataLoaded();
+
+        // Try to find the mall based on its id
+        Optional<MallResponse> mallFound = data.getCities().stream()
+                .flatMap(city -> city.getMalls().stream())
+                .collect(Collectors.toList()).stream()
+                .filter(mall -> mall.getId() == mallId)
+                .findFirst();
+
+        // If the mall is present, return its shops. Otherwise return null
+        if(mallFound.isPresent()) {
+            return mallFound.get().getShops().stream()
+                    .map(shop -> new Shop(shop))
+                    .collect(Collectors.toList());
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * @param mall the mall that the shop is found in
+     * @param shopId the id of the shop to be retrieved
+     * @return a shop based on provided mall and shopId, or null if the shop can't be found
+     */
+    public Shop getShop(Mall mall, long shopId) {
+        return getShop(mall.getId(), shopId);
+    }
+
+    /**
+     * @param mallId the id of the mall that the shop is found in
+     * @param shopId the id of the shop to be retrieved
+     * @return a shop based on provided mall and shopId, or null if the shop can't be found
+     */
+    public Shop getShop(long mallId, long shopId) {
+        // Ensure we have data before proceeding
+        checkDataLoaded();
+
+        // Try to find the mall based on its id
+        Optional<MallResponse> mallFound = data.getCities().stream()
+                .flatMap(city -> city.getMalls().stream())
+                .collect(Collectors.toList()).stream()
+                .filter(mall -> mall.getId() == mallId)
+                .findFirst();
+
+        // If the mall is present, search for the shop
+        if(mallFound.isPresent()) {
+            // Try to find the shop based on its id
+            Optional<ShopResponse> shopFound = mallFound.get().getShops().stream()
+                    .filter(shop -> shop.getId() == shopId)
+                    .findFirst();
+
+            // If the mall was found, return it
+            if(shopFound.isPresent()) {
+                return new Shop(shopFound.get());
+            }
+        }
+
+        // If the mall or the shop is not found, return null
         return null;
     }
 
