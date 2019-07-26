@@ -20,9 +20,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import za.co.steff.shopaholicsdk.common.dto.City;
 import za.co.steff.shopaholicsdk.common.dto.Mall;
+import za.co.steff.shopaholicsdk.common.dto.Shop;
 import za.co.steff.shopaholicsdk.network.model.CitiesResponse;
 import za.co.steff.shopaholicsdk.network.model.CityResponse;
 import za.co.steff.shopaholicsdk.network.model.MallResponse;
+import za.co.steff.shopaholicsdk.network.model.ShopResponse;
 import za.co.steff.shopaholicsdk.network.service.MockShopaholicService;
 import za.co.steff.shopaholicsdk.network.service.ShopaholicService;
 
@@ -99,11 +101,11 @@ public class ShopaholicClientTest {
     public void clientReturnsExpectedListOfMalls() throws Exception {
         awaitClientSetup();
 
-        // Assert that our client's list of malls for the first city matches our test data
+        // Assert that our client's list of malls for our cities matches our test data
         for(int i = 0; i < expectedResponse.getCities().size(); i++) {
             CityResponse ourCity = expectedResponse.getCities().get(i);
 
-            // Test the malls contained in our client's city matches our test data
+            // Test that the malls contained in our client's city matches our test data
             for(int j = 0; j < ourCity.getMalls().size(); j++) {
                 MallResponse ourMall = ourCity.getMalls().get(j);
                 Mall clientMall = client.getMallsForCity(ourCity.getId()).get(j);
@@ -132,6 +134,48 @@ public class ShopaholicClientTest {
         assertNotEquals(ourMall.getName(), clientMall.getName());
     }
 
+    /** As a developer, I would like to request a list of shops in a mall. **/
+    @Test
+    public void clientReturnsExpectedListOfShops() throws Exception {
+        awaitClientSetup();
+
+        // Assert that our client's list of shops in the malls for our cities matches our test data
+        for(int i = 0; i < expectedResponse.getCities().size(); i++) {
+            CityResponse ourCity = expectedResponse.getCities().get(i);
+
+            // Test that the malls contained in our client's city matches our test data
+            for(int j = 0; j < ourCity.getMalls().size(); j++) {
+                MallResponse ourMall = ourCity.getMalls().get(j);
+
+                for(int k = 0; k < ourMall.getShops().size(); k++) {
+                    ShopResponse ourShop = ourMall.getShops().get(k);
+                    Shop clientShop = client.getShopsForMall(ourMall.getId()).get(k);
+
+                    assertEquals(ourShop.getId(), clientShop.getId());
+                    assertEquals(ourShop.getName(), clientShop.getName());
+                }
+            }
+        }
+    }
+
+    /** As a developer, I would like to request a particular shop in a mall. **/
+    @Test
+    public void clientReturnsExpectedShop() throws Exception {
+        awaitClientSetup();
+
+        // Take a mall from our expected response and test whether its name matches the name of the mall returned by our client
+        CityResponse ourCity = expectedResponse.getCities().get(0);
+        MallResponse ourMall = ourCity.getMalls().get(0);
+        ShopResponse ourShop = ourMall.getShops().get(0);
+
+        Shop clientShop = client.getShop(ourMall.getId(), ourShop.getId());
+        assertEquals(ourShop.getName(), clientShop.getName());
+
+        // Testing negative case
+        ourShop = new ShopResponse();
+        ourShop.setName("random-shop-name");
+        assertNotEquals(ourShop.getName(), clientShop.getName());
+    }
 
     private void awaitClientSetup() throws Exception {
         // Create a countdown latch to await the asynchronous result of our ShopaholicClient's initialization
