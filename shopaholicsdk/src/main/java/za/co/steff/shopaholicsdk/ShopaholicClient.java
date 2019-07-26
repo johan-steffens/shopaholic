@@ -32,12 +32,22 @@ public class ShopaholicClient {
     public ShopaholicClient(ShopaholicClientEventListener listener) {
         this.listener = listener;
 
+        // Using the default Retrofit implementation ShopaholicService
+        service = APIServiceGenerator.generateService(ShopaholicService.class);
+
+        // Fetch initial batch of data
+        fetchRemoteData();
+    }
+
+    public ShopaholicClient(ShopaholicClientEventListener listener, ShopaholicService service) {
+        this.listener = listener;
+        this.service = service;
+
         // Fetch initial batch of data
         fetchRemoteData();
     }
 
     private void fetchRemoteData() {
-        service = APIServiceGenerator.generateService(ShopaholicService.class);
         service.getAllCities().enqueue(getAllCitiesCallback);
     }
 

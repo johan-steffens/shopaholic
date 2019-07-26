@@ -1,87 +1,102 @@
 package za.co.steff.shopaholicsdk;
 
+import android.util.Log;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.nio.file.Files;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
-import za.co.steff.shopaholicsdk.network.APIServiceGenerator;
+import za.co.steff.shopaholicsdk.network.service.MockShopaholicService;
+import za.co.steff.shopaholicsdk.network.service.ShopaholicService;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({Log.class})
 public class ShopaholicClientTest {
 
-    private MockWebServer mockWebServer;
+    @Mock
+    ShopaholicService shopaholicService;
 
     @Before
-    public void setUp() throws Exception {
-        mockWebServer = new MockWebServer();
-        mockWebServer.start();
-
-        // Change the URL of our service to hit our mock service
-        APIServiceGenerator.BASE_URL = "http://localhost:8888/";
+    public void setUp() {
+        // Tell PowerMockito to mock all static calls of the Log class
+        // Without this any static Log calls will throw an exception
+        PowerMockito.mockStatic(Log.class);
     }
 
     @Test
-    public void clientLoadsSuccessfully() throws InterruptedException {
-        // Enqueue a successful response to be used by our once-off client
-        mockWebServer.enqueue(new MockResponse()
-                .setBody("{ \"cities\": [ {\n" +
-                        "      \"id\": 1,\n" +
-                        "      \"name\": \"Cape Town\",\n" +
-                        "      \"malls\": [\n" +
-                        "        {\n" +
-                        "          \"id\": 1,\n" +
-                        "          \"name\": \"Century City\",\n" +
-                        "          \"shops\": [\n" +
-                        "            {\n" +
-                        "              \"id\": 1,\n" +
-                        "              \"name\": \"Nespresso\"\n" +
-                        "            }\n" +
-                        "          ]\n" +
-                        "        }\n" +
-                        "      ]\n" +
-                        "    }\n" +
-                        "  ]\n" +
-                        "}")
-                .setResponseCode(200));
+    public void clientLoadsSuccessfully() throws Exception {
+        // Create a mock ShopaholicService that returns success and an empty body
+        shopaholicService = new MockShopaholicService(true);
 
-        // Create a countdown latch to await the asynchronous nature of our ShopaholicClient
+        // Create a countdown latch to await the asynchronous result of our ShopaholicClient's initialization
         final CountDownLatch latch = new CountDownLatch(1);
-        final AtomicBoolean success = new AtomicBoolean(false);
+        final AtomicBoolean initializationResult = new AtomicBoolean(false);
 
-        // Build a once-off client to ensure client loads successfully
+        // Try to initialize our client, passing it our mock ShopaholicService
         new ShopaholicClient(new ShopaholicClient.ShopaholicClientEventListener() {
             @Override
             public void onClientLoaded() {
-                success.set(true);
+                // If it passes, release our latch with a successful result
+                initializationResult.set(true);
                 latch.countDown();
             }
 
             @Override
             public void onClientLoadError(Throwable t) {
+                // If it fails, release our latch with a false result
                 latch.countDown();
             }
-        });
+        }, shopaholicService);
+        latch.await();
 
-        // Await our result timing out after 30 seconds
-        latch.await(30, TimeUnit.SECONDS);
+        // When our latch releases, assert that our client loaded without issues
+        assertTrue(initializationResult.get());
+    }
 
-        // Check whether client loaded successfully
-        assertTrue(success.get());
+    @Test
+    public void clientFailsGracefully() throws Exception {
+        // Replace our existing ShopaholicService with one that expects an initialization error
+        shopaholicService = new MockShopaholicService(false);
+
+        // Create a countdown latch to await the asynchronous result of our ShopaholicClient's initialization
+        final CountDownLatch latch = new CountDownLatch(1);
+        final AtomicBoolean initializationResult = new AtomicBoolean(true);
+
+        // Try to initialize our client, passing it our mock ShopaholicService
+        new ShopaholicClient(new ShopaholicClient.ShopaholicClientEventListener() {
+            @Override
+            public void onClientLoaded() {
+                // If it passes, release our latch with a successful result
+                latch.countDown();
+            }
+
+            @Override
+            public void onClientLoadError(Throwable t) {
+                // If it fails, release our latch with a false result
+                initializationResult.set(false);
+                latch.countDown();
+            }
+        }, shopaholicService);
+        latch.await();
+
+        // When our latch releases, assert that our client loaded without issues
+        assertFalse(initializationResult.get());
     }
 
     @After
     public void tearDown() throws Exception {
-        mockWebServer.shutdown();
+
     }
 
 }
