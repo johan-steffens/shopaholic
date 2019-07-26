@@ -19,7 +19,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import za.co.steff.shopaholicsdk.common.dto.City;
+import za.co.steff.shopaholicsdk.common.dto.Mall;
 import za.co.steff.shopaholicsdk.network.model.CitiesResponse;
+import za.co.steff.shopaholicsdk.network.model.CityResponse;
+import za.co.steff.shopaholicsdk.network.model.MallResponse;
 import za.co.steff.shopaholicsdk.network.service.MockShopaholicService;
 import za.co.steff.shopaholicsdk.network.service.ShopaholicService;
 
@@ -60,17 +63,75 @@ public class ShopaholicClientTest {
         shopaholicService.setExpectedResponse(expectedResponse);
     }
 
+    /** As a developer, I would like to request a list of cities. **/
     @Test
     public void clientReturnsExpectedListOfCities() throws Exception {
-        // Await our client setup
         awaitClientSetup();
 
         // Assert that our client's list of cities matches our test data
         for(int i = 0; i < expectedResponse.getCities().size(); i++) {
-            assertEquals(expectedResponse.getCities().get(i).getId(), client.getAllCities().get(i).getId());
-            assertEquals(expectedResponse.getCities().get(i).getName(), client.getAllCities().get(i).getName());
+            CityResponse ourCity = expectedResponse.getCities().get(i);
+            City clientCity = client.getAllCities().get(i);
+
+            assertEquals(ourCity.getId(), clientCity.getId());
+            assertEquals(ourCity.getName(), clientCity.getName());
         }
     }
+
+    /** As a developer, I would like to request a particular city. **/
+    @Test
+    public void clientReturnsExpectedCity() throws Exception {
+        awaitClientSetup();
+
+        // Take a city from our expected response and test whether its name matches the name of the city returned by our client
+        CityResponse ourCity = expectedResponse.getCities().get(0);
+        City clientCity = client.getCity(ourCity.getId());
+        assertEquals(ourCity.getName(), clientCity.getName());
+
+        // Testing negative case
+        ourCity = new CityResponse();
+        ourCity.setName("random-city-name");
+        assertNotEquals(ourCity.getName(), clientCity.getName());
+    }
+
+    /** As a developer, I would like to request a list of malls in a city. **/
+    @Test
+    public void clientReturnsExpectedListOfMalls() throws Exception {
+        awaitClientSetup();
+
+        // Assert that our client's list of malls for the first city matches our test data
+        for(int i = 0; i < expectedResponse.getCities().size(); i++) {
+            CityResponse ourCity = expectedResponse.getCities().get(i);
+
+            // Test the malls contained in our client's city matches our test data
+            for(int j = 0; j < ourCity.getMalls().size(); j++) {
+                MallResponse ourMall = ourCity.getMalls().get(j);
+                Mall clientMall = client.getMallsForCity(ourCity.getId()).get(j);
+
+                assertEquals(ourMall.getId(), clientMall.getId());
+                assertEquals(ourMall.getName(), clientMall.getName());
+            }
+        }
+    }
+
+    /** As a developer, I would like to request a particular mall in a city. **/
+    @Test
+    public void clientReturnsExpectedMall() throws Exception {
+        awaitClientSetup();
+
+        // Take a mall from our expected response and test whether its name matches the name of the mall returned by our client
+        CityResponse ourCity = expectedResponse.getCities().get(0);
+        MallResponse ourMall = ourCity.getMalls().get(0);
+
+        Mall clientMall = client.getMall(ourCity.getId(), ourMall.getId());
+        assertEquals(ourMall.getName(), clientMall.getName());
+
+        // Testing negative case
+        ourMall = new MallResponse();
+        ourMall.setName("random-mall-name");
+        assertNotEquals(ourMall.getName(), clientMall.getName());
+    }
+
 
     private void awaitClientSetup() throws Exception {
         // Create a countdown latch to await the asynchronous result of our ShopaholicClient's initialization
@@ -98,11 +159,6 @@ public class ShopaholicClientTest {
         if(client == null || ! initializationResult.get()) {
             throw new IllegalStateException("Client initialization failed. Expected success.");
         }
-    }
-
-    @After
-    public void tearDown() throws Exception {
-
     }
 
 }
