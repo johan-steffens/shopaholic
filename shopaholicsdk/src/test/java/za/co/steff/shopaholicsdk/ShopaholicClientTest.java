@@ -18,22 +18,23 @@ import java.io.InputStreamReader;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import za.co.steff.shopaholicsdk.common.dto.City;
 import za.co.steff.shopaholicsdk.network.model.CitiesResponse;
 import za.co.steff.shopaholicsdk.network.service.MockShopaholicService;
 import za.co.steff.shopaholicsdk.network.service.ShopaholicService;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Log.class})
 public class ShopaholicClientTest {
 
-    @Mock
-    ShopaholicService shopaholicService;
+    private MockShopaholicService shopaholicService;
+    private ShopaholicClient client;
 
     private CitiesResponse expectedResponse;
 
@@ -48,22 +49,36 @@ public class ShopaholicClientTest {
         InputStreamReader streamReader = new InputStreamReader(successResponse);
         expectedResponse = new Gson().fromJson(streamReader, CitiesResponse.class);
 
-        // Assert that our test data loaded successfully
+        // Ensure that our test data loaded successfully
         assertNotNull(expectedResponse);
-        assertNotEquals(expectedResponse.getCities().size(), 0);
+        assertNotEquals(expectedResponse.getCities().size(), 0); // Our test data should always have at least one city
+        assertNotEquals(expectedResponse.getCities().get(0).getMalls().size(), 0); // Our test data should always have at least one mall
+        assertNotEquals(expectedResponse.getCities().get(0).getMalls().get(0).getShops().size(), 0); // Our test data should always have at least one shop
+
+        // Configure our mock ShopaholicService
+        shopaholicService = new MockShopaholicService(true);
+        shopaholicService.setExpectedResponse(expectedResponse);
     }
 
     @Test
-    public void clientLoadSucceeds() throws Exception {
-        // Create a mock ShopaholicService that returns success and an empty body
-        shopaholicService = new MockShopaholicService(true);
+    public void clientReturnsExpectedListOfCities() throws Exception {
+        // Await our client setup
+        awaitClientSetup();
 
+        // Assert that our client's list of cities matches our test data
+        for(int i = 0; i < expectedResponse.getCities().size(); i++) {
+            assertEquals(expectedResponse.getCities().get(i).getId(), client.getAllCities().get(i).getId());
+            assertEquals(expectedResponse.getCities().get(i).getName(), client.getAllCities().get(i).getName());
+        }
+    }
+
+    private void awaitClientSetup() throws Exception {
         // Create a countdown latch to await the asynchronous result of our ShopaholicClient's initialization
         final CountDownLatch latch = new CountDownLatch(1);
         final AtomicBoolean initializationResult = new AtomicBoolean(false);
 
         // Try to initialize our client, passing it our mock ShopaholicService
-        new ShopaholicClient(new ShopaholicClient.ShopaholicClientEventListener() {
+        client = new ShopaholicClient(new ShopaholicClient.ShopaholicClientEventListener() {
             @Override
             public void onClientLoaded() {
                 // If it passes, release our latch with a successful result
@@ -79,43 +94,10 @@ public class ShopaholicClientTest {
         }, shopaholicService);
         latch.await();
 
-        // When our latch releases, assert that our client loaded without issues
-        assertTrue(initializationResult.get());
-    }
-
-    @Test
-    public void clientLoadFailsGracefully() throws Exception {
-        // Replace our existing ShopaholicService with one that expects an initialization error
-        shopaholicService = new MockShopaholicService(false);
-
-        // Create a countdown latch to await the asynchronous result of our ShopaholicClient's initialization
-        final CountDownLatch latch = new CountDownLatch(1);
-        final AtomicBoolean initializationResult = new AtomicBoolean(true);
-
-        // Try to initialize our client, passing it our mock ShopaholicService
-        new ShopaholicClient(new ShopaholicClient.ShopaholicClientEventListener() {
-            @Override
-            public void onClientLoaded() {
-                // If it passes, release our latch with a successful result
-                latch.countDown();
-            }
-
-            @Override
-            public void onClientLoadError(Throwable t) {
-                // If it fails, release our latch with a false result
-                initializationResult.set(false);
-                latch.countDown();
-            }
-        }, shopaholicService);
-        latch.await();
-
-        // When our latch releases, assert that our client loaded without issues
-        assertFalse(initializationResult.get());
-    }
-
-    @Test
-    public void clientReturnsListOfCities() {
-
+        // If client load fails, throw an exception
+        if(client == null || ! initializationResult.get()) {
+            throw new IllegalStateException("Client initialization failed. Expected success.");
+        }
     }
 
     @After
