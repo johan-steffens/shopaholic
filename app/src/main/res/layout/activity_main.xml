@@ -14,6 +14,15 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"/>
 
+    <View
+        android:id="@+id/emitter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@id/imgLogo"
+        android:layout_alignRight="@id/imgLogo"
+        android:layout_alignTop="@id/imgLogo"
+        android:layout_alignBottom="@id/imgLogo"/>
+
     <ListView
         android:id="@+id/listShopaholic"
         android:layout_width="match_parent"

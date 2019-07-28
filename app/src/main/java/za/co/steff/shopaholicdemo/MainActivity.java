@@ -10,6 +10,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.plattysoft.leonids.ParticleSystem;
+import com.plattysoft.leonids.modifiers.AlphaModifier;
+import com.plattysoft.leonids.modifiers.ScaleModifier;
+
+import java.util.Random;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import za.co.steff.shopaholicdemo.adapter.CitiesAdapter;
@@ -136,6 +142,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onShopSelected(Shop shop) {
             warningShown = false;
+            yay();
         }
     };
 
@@ -156,5 +163,15 @@ public class MainActivity extends AppCompatActivity {
         } else if(listShopaholic.getTag() instanceof ShopsAdapter) {
             showMalls(selectedCity);
         }
+    }
+
+    void yay() {
+        new ParticleSystem(MainActivity.this, 4, R.drawable.img_entersekt, 8000)
+                .setSpeedByComponentsRange(0.025f, 0.025f, 0.06f, 0.08f)
+                .setAccelerationModuleAndAndAngleRange(0.00001f, 0.0001f, 0, 180)
+                .setInitialRotationRange(0, 360)
+                .addModifier(new AlphaModifier(255, 0, 500, 2000))
+                .addModifier(new ScaleModifier(1f, 0.25f, 500, 2000))
+                .oneShot(findViewById(R.id.emitter), 12);
     }
 }
