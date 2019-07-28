@@ -170,6 +170,7 @@ public class MainActivity extends AppCompatActivity {
                 .setSpeedByComponentsRange(0.025f, 0.025f, 0.06f, 0.08f)
                 .setAccelerationModuleAndAndAngleRange(0.00001f, 0.0001f, 0, 180)
                 .setInitialRotationRange(0, 360)
+                .setRotationSpeedRange(0, 180)
                 .addModifier(new AlphaModifier(255, 0, 500, 2000))
                 .addModifier(new ScaleModifier(1f, 0.25f, 500, 2000))
                 .oneShot(findViewById(R.id.emitter), 12);
