@@ -43,3 +43,8 @@ After creating the file above, add the following line to your app's Manifest fil
     </application>
 </manifest>
 ```
+
+## Running tests
+
+To run the unit tests included with the SDK project, you can run the 
+"Run Tests" run configuration in Android Studio.
