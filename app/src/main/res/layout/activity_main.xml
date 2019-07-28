@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#000">
 
     <ImageView
         android:id="@+id/imgLogo"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:src="@drawable/img_logo"
+        android:tint="@color/colorAccent"
         android:adjustViewBounds="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"/>
@@ -16,6 +18,7 @@
         android:id="@+id/listShopaholic"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/semiTransparent"
         android:layout_below="@id/imgLogo"
         android:layout_alignParentBottom="true"
         android:layout_marginTop="20dp">
@@ -23,10 +26,9 @@
     </ListView>
 
     <TextView
-        android:id="@+id/txtStatus"
+        android:id="@+id/txtLoading"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/semiTransparent"
         android:layout_alignTop="@id/listShopaholic"
         android:layout_alignBottom="@id/listShopaholic"
         android:gravity="center"

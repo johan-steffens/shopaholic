@@ -4,11 +4,9 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -26,13 +24,10 @@ import za.co.steff.shopaholicsdk.network.model.CityResponse;
 import za.co.steff.shopaholicsdk.network.model.MallResponse;
 import za.co.steff.shopaholicsdk.network.model.ShopResponse;
 import za.co.steff.shopaholicsdk.network.service.MockShopaholicService;
-import za.co.steff.shopaholicsdk.network.service.ShopaholicService;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Log.class})

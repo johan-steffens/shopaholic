@@ -13,19 +13,13 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import za.co.steff.shopaholicsdk.network.model.CitiesResponse;
 import za.co.steff.shopaholicsdk.network.service.MockShopaholicService;
 import za.co.steff.shopaholicsdk.network.service.ShopaholicService;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(PowerMockRunner.class)
